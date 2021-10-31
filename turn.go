@@ -22,9 +22,10 @@ type Turn struct {
 	StdinPipe io.WriteCloser
 	Session   *ssh.Session
 	WsConn    *websocket.Conn
+	Recorder  *Recorder
 }
 
-func NewTurn(wsConn *websocket.Conn, sshClient *ssh.Client) (*Turn, error) {
+func NewTurn(wsConn *websocket.Conn, sshClient *ssh.Client, rec *Recorder) (*Turn, error) {
 	sess, err := sshClient.NewSession()
 	if err != nil {
 		return nil, err
@@ -50,6 +51,12 @@ func NewTurn(wsConn *websocket.Conn, sshClient *ssh.Client) (*Turn, error) {
 	if err := sess.Shell(); err != nil {
 		return nil, err
 	}
+
+	if rec != nil {
+		turn.Recorder = rec
+		turn.Recorder.WriteHeader(120, 30)
+	}
+
 	return turn, nil
 }
 
@@ -59,6 +66,9 @@ func (t *Turn) Write(p []byte) (n int, err error) {
 		return 0, err
 	}
 	defer writer.Close()
+	if t.Recorder != nil {
+		t.Recorder.WriteData(OutPutType, string(p))
+	}
 	return writer.Write(p)
 }
 func (t *Turn) Close() error {

@@ -4,7 +4,7 @@
 
 ## 特性
 - 前后端分离，前端使用xterm、vue，后端使用golang写的服务
-
+- 
 
 ## run demo
 
@@ -40,3 +40,7 @@ $ go build -o webssh main.go
 $ ./webssh
 ```
 - 用浏览器打开`http://localhost:8080/`
+
+```bash
+$ asciinema play rec/filename
+```

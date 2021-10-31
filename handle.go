@@ -3,15 +3,26 @@ package webssh
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"path"
 	"sync"
+	"syscall"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 )
 
+var (
+	record     bool   = true
+	recPath    string = "./rec"
+	remoteAddr string = "localhost:22"
+	user       string = "wida"
+	password   string = "wida"
+)
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024 * 10,
@@ -36,9 +47,9 @@ func ServeConn(c *gin.Context) {
 		), */
 		//使用密码登录
 		SSHClientConfigPassword(
-			"host:22",
-			"user",
-			"pwd",
+			remoteAddr,
+			user,
+			password,
 		),
 	)
 
@@ -48,14 +59,29 @@ func ServeConn(c *gin.Context) {
 		return
 	}
 	defer client.Close()
-	conn, err := NewTurn(wsConn, client)
+
+	var recorder *Recorder
+	if record {
+		mask := syscall.Umask(0)
+		defer syscall.Umask(mask)
+		os.MkdirAll(recPath, 0766)
+		fileName := path.Join(recPath, fmt.Sprintf("%s_%s_%s.cast", remoteAddr, user, time.Now().Format("20060102_150405")))
+		f, err := os.OpenFile(fileName, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0766)
+		if err != nil {
+			c.AbortWithStatusJSON(200, gin.H{"ok": false, "msg": err.Error()})
+		}
+		defer f.Close()
+		recorder = NewRecorder(f)
+	}
+
+	turn, err := NewTurn(wsConn, client, recorder)
 
 	if err != nil {
 		wsConn.WriteControl(websocket.CloseMessage,
 			[]byte(err.Error()), time.Now().Add(time.Second))
 		return
 	}
-	defer conn.Close()
+	defer turn.Close()
 
 	var logBuff = bufPool.Get().(*bytes.Buffer)
 	logBuff.Reset()
@@ -66,14 +92,14 @@ func ServeConn(c *gin.Context) {
 	wg.Add(2)
 	go func() {
 		defer wg.Done()
-		err := conn.LoopRead(logBuff, ctx)
+		err := turn.LoopRead(logBuff, ctx)
 		if err != nil {
 			log.Printf("%#v", err)
 		}
 	}()
 	go func() {
 		defer wg.Done()
-		err := conn.SessionWait()
+		err := turn.SessionWait()
 		if err != nil {
 			log.Printf("%#v", err)
 		}
