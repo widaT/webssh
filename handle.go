@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"path"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -122,4 +124,23 @@ func (w WebSSH) ServeConn(c *gin.Context) {
 		cancel()
 	}()
 	wg.Wait()
+}
+
+func (w WebSSH) RecoderList(c *gin.Context) {
+	files, err := ioutil.ReadDir(w.RecPath)
+	if err != nil {
+		c.AbortWithStatusJSON(200, gin.H{"ok": false, "msg": err.Error()})
+		return
+	}
+	var filesName []string
+	for _, f := range files {
+		if f.IsDir() {
+			continue
+		}
+
+		if strings.HasSuffix(f.Name(), ".cast") {
+			filesName = append(filesName, f.Name())
+		}
+	}
+	c.JSON(200, filesName)
 }

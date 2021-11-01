@@ -3,6 +3,7 @@ package webssh
 import (
 	"encoding/json"
 	"io"
+	"sync"
 	"time"
 )
 
@@ -35,6 +36,7 @@ func defaultRecHeader() *RecHeader {
 type Recorder struct {
 	StartTime time.Time
 	Writer    io.Writer
+	sync.Mutex
 }
 
 func NewRecorder(writer io.Writer) *Recorder {

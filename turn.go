@@ -54,7 +54,9 @@ func NewTurn(wsConn *websocket.Conn, sshClient *ssh.Client, rec *Recorder) (*Tur
 
 	if rec != nil {
 		turn.Recorder = rec
+		turn.Recorder.Lock()
 		turn.Recorder.WriteHeader(30, 150)
+		turn.Recorder.Unlock()
 	}
 
 	return turn, nil
@@ -67,7 +69,9 @@ func (t *Turn) Write(p []byte) (n int, err error) {
 	}
 	defer writer.Close()
 	if t.Recorder != nil {
+		t.Recorder.Lock()
 		t.Recorder.WriteData(OutPutType, string(p))
+		t.Recorder.Unlock()
 	}
 	return writer.Write(p)
 }

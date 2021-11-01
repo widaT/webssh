@@ -29,6 +29,7 @@ func main() {
 	handle := webssh.NewWebSSH(confing)
 
 	r.GET("/ws/:id", handle.ServeConn)
+	r.GET("/recoder", handle.RecoderList)
 	r.Static("/static", "./front/dist/")
 	r.Static("/rec", "./rec/") //录像回看目录
 	r.LoadHTMLFiles("./front/dist/index.html")

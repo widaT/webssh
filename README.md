@@ -33,14 +33,8 @@ confing := &webssh.WebSSHConfig{
 $ go build -o webssh main.go
 $ ./webssh
 ```
-- 用浏览器打开`http://localhost:8080/`
+- 用浏览器打开`http://localhost:8080/#/term` 
 
 ## 查看录像
 
-修改 `rec/index.html`的`src`
-
-```html
-   <asciinema-player src="./1.cast"></asciinema-player>
-```
-
-- 用浏览器打开`http://localhost:8080/rec/`
+- 用浏览器打开`http://localhost:8080/#/rec`，顶部有选择器，选择生成的文件播放（手动点击播放）。
