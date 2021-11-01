@@ -19,7 +19,7 @@ func main() {
 
 	confing := &webssh.WebSSHConfig{
 		Record:     true,
-		RecPath:    "./rec/cast/",
+		RecPath:    "./rec/",
 		RemoteAddr: "localhost:22",
 		User:       "wida",
 		Password:   "wida",
