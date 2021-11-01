@@ -36,7 +36,7 @@ export default {
     methods: {
         selectFile:function(event){
             console.log(event.target.value)
-            this.url = "/rec/cast/"+event.target.value
+            this.url = "/rec/"+event.target.value
             console.log(this.url)
             document.getElementById("player").innerHTML= '<asciinema-player src="'+this.url+'"></asciinema-player>'
         }
