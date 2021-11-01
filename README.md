@@ -4,7 +4,7 @@
 
 ## 特性
 - 前后端分离，前端使用xterm、vue，后端使用golang写的服务
-- 
+- 支持录像审计，支持录像回看
 
 ## run demo
 
@@ -16,23 +16,17 @@ $ npm run build # 可以看到在front线生产一个dist目录，里头就是�
 ```
 - 编译golang程序
 
-修改`handle.go`文件中目标主机和登录方式
+修改`main.go`文件中目标主机和登录方式
 
 ```go
-client, err := NewSSHClient(
-    //使用私钥登录
-    /* 		SSHClientConfigPulicKey(
-        "host:22",
-        "user",
-        "/home/user/ssh/user.id_rsa",
-    ), */
-    //使用密码登录
-    SSHClientConfigPassword(
-        "host:22",
-        "user",
-        "pwd",
-    ),
-)
+confing := &webssh.WebSSHConfig{
+		Record:     true,
+		RecPath:    "./rec/cast/",
+		RemoteAddr: "localhost:22",
+		User:       "wida",
+		Password:   "wida",
+		AuthModel:  webssh.PASSWORD,
+	}
 ```
 
 ```bash
@@ -41,6 +35,12 @@ $ ./webssh
 ```
 - 用浏览器打开`http://localhost:8080/`
 
-```bash
-$ asciinema play rec/filename
+## 查看录像
+
+修改 `rec/index.html`的`src`
+
+```html
+   <asciinema-player src="./1.cast"></asciinema-player>
 ```
+
+- 用浏览器打开`http://localhost:8080/rec/`

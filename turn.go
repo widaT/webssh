@@ -45,7 +45,7 @@ func NewTurn(wsConn *websocket.Conn, sshClient *ssh.Client, rec *Recorder) (*Tur
 		ssh.TTY_OP_ISPEED: 14400, // input speed = 14.4kbaud
 		ssh.TTY_OP_OSPEED: 14400, // output speed = 14.4kbaud
 	}
-	if err := sess.RequestPty("xterm", 120, 32, modes); err != nil {
+	if err := sess.RequestPty("xterm", 150, 30, modes); err != nil {
 		return nil, err
 	}
 	if err := sess.Shell(); err != nil {
@@ -54,7 +54,7 @@ func NewTurn(wsConn *websocket.Conn, sshClient *ssh.Client, rec *Recorder) (*Tur
 
 	if rec != nil {
 		turn.Recorder = rec
-		turn.Recorder.WriteHeader(120, 30)
+		turn.Recorder.WriteHeader(30, 150)
 	}
 
 	return turn, nil

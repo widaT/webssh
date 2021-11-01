@@ -16,13 +16,26 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-var (
-	record     bool   = true
-	recPath    string = "./rec"
-	remoteAddr string = "localhost:22"
-	user       string = "wida"
-	password   string = "wida"
-)
+type WebSSHConfig struct {
+	Record     bool
+	RecPath    string
+	RemoteAddr string
+	User       string
+	Password   string
+	AuthModel  AuthModel
+	PkPath     string
+}
+
+type WebSSH struct {
+	*WebSSHConfig
+}
+
+func NewWebSSH(conf *WebSSHConfig) *WebSSH {
+	return &WebSSH{
+		WebSSHConfig: conf,
+	}
+}
+
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024 * 10,
@@ -31,28 +44,31 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-func ServeConn(c *gin.Context) {
+func (w WebSSH) ServeConn(c *gin.Context) {
 	wsConn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		c.AbortWithStatusJSON(200, gin.H{"ok": false, "msg": err.Error()})
 		return
 	}
 	defer wsConn.Close()
-	client, err := NewSSHClient(
-		//使用私钥登录
-		/* 		SSHClientConfigPulicKey(
-			"host:22",
-			"user",
-			"/home/user/ssh/user.id_rsa",
-		), */
-		//使用密码登录
-		SSHClientConfigPassword(
-			remoteAddr,
-			user,
-			password,
-		),
-	)
+	var config *SSHClientConfig
+	switch w.AuthModel {
 
+	case PASSWORD:
+		config = SSHClientConfigPassword(
+			w.RemoteAddr,
+			w.User,
+			w.Password,
+		)
+	case PUBLICKEY:
+		SSHClientConfigPulicKey(
+			w.RemoteAddr,
+			w.User,
+			w.PkPath,
+		)
+	}
+
+	client, err := NewSSHClient(config)
 	if err != nil {
 		wsConn.WriteControl(websocket.CloseMessage,
 			[]byte(err.Error()), time.Now().Add(time.Second))
@@ -61,11 +77,11 @@ func ServeConn(c *gin.Context) {
 	defer client.Close()
 
 	var recorder *Recorder
-	if record {
+	if w.Record {
 		mask := syscall.Umask(0)
 		defer syscall.Umask(mask)
-		os.MkdirAll(recPath, 0766)
-		fileName := path.Join(recPath, fmt.Sprintf("%s_%s_%s.cast", remoteAddr, user, time.Now().Format("20060102_150405")))
+		os.MkdirAll(w.RecPath, 0766)
+		fileName := path.Join(w.RecPath, fmt.Sprintf("%s_%s_%s.cast", w.RemoteAddr, w.User, time.Now().Format("20060102_150405")))
 		f, err := os.OpenFile(fileName, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0766)
 		if err != nil {
 			c.AbortWithStatusJSON(200, gin.H{"ok": false, "msg": err.Error()})

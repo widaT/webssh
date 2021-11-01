@@ -9,11 +9,12 @@
   },
   "dependencies": {
     "core-js": "^3.6.5",
+    "crypto-js": "^4.0.0",
     "vue": "^2.6.11",
+    "vue-router": "^3.5.3",
     "xterm": "^4.14.1",
     "xterm-addon-attach": "^0.6.0",
-    "xterm-addon-fit": "^0.5.0",
-    "crypto-js": "^4.0.0"
+    "xterm-addon-fit": "^0.5.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",
