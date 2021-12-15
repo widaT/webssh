@@ -63,7 +63,7 @@ func (w WebSSH) ServeConn(c *gin.Context) {
 			w.Password,
 		)
 	case PUBLICKEY:
-		SSHClientConfigPulicKey(
+		config = SSHClientConfigPulicKey(
 			w.RemoteAddr,
 			w.User,
 			w.PkPath,
