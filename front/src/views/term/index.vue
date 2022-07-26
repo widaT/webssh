@@ -20,9 +20,10 @@ export default {
         fitAddon.fit()
         let terminalContainer = document.getElementById("app")
         const webSocket = new WebSocket(`ws://127.0.0.1:8080/ws/1`)
-
+        webSocket.binaryType='arraybuffer';
+        const enc = new TextDecoder("utf-8");
         webSocket.onmessage = (event) => {
-            terminal.write(event.data.toString(Utf8))
+            terminal.write(enc.decode(event.data));
         }
 
         webSocket.onopen = () => {
@@ -42,7 +43,7 @@ export default {
         }
 
         terminal.onKey((event) => {
-            webSocket.send(msgData + Base64.stringify(Utf8.parse(event.key)))
+            webSocket.send(msgData + Base64.stringify(Utf8.parse(event.key)),ArrayBuffer)
         })
 
         terminal.onResize(({ cols, rows }) => {
@@ -55,7 +56,7 @@ export default {
                             rows: rows
                         })
                     )
-                )
+                ),ArrayBuffer
             )
         })
         // 内容全屏显示-窗口大小发生改变时

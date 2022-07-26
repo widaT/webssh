@@ -63,7 +63,7 @@ func NewTurn(wsConn *websocket.Conn, sshClient *ssh.Client, rec *Recorder) (*Tur
 }
 
 func (t *Turn) Write(p []byte) (n int, err error) {
-	writer, err := t.WsConn.NextWriter(websocket.TextMessage)
+	writer, err := t.WsConn.NextWriter(websocket.BinaryMessage)
 	if err != nil {
 		return 0, err
 	}
@@ -73,6 +73,8 @@ func (t *Turn) Write(p []byte) (n int, err error) {
 		t.Recorder.WriteData(OutPutType, string(p))
 		t.Recorder.Unlock()
 	}
+
+	//fmt.Printf("%s", p)
 	return writer.Write(p)
 }
 func (t *Turn) Close() error {
@@ -88,7 +90,7 @@ func (t *Turn) Read(p []byte) (n int, err error) {
 		if err != nil {
 			return 0, err
 		}
-		if msgType != websocket.TextMessage {
+		if msgType != websocket.BinaryMessage {
 			continue
 		}
 		return reader.Read(p)
