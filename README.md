@@ -30,7 +30,7 @@ confing := &webssh.WebSSHConfig{
 ```
 
 ```bash
-$ go build -o webssh main.go
+$ go build -o webssh bin/sever/main.go   
 $ ./webssh
 ```
 - 用浏览器打开`http://localhost:8080/#/term` 
